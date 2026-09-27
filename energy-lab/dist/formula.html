@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>에너지 공식 외우기 퀴즈</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230ea5e9'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3EE%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #f0f4f9;
+      padding: 16px;
+      font-family: Arial, "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+    .formula-app {
+      max-width: 580px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(14, 165, 233, 0.12);
+      border: 1px solid #e2e8f0;
+    }
+    .formula-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #eef2f6;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .formula-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .formula-title h1 {
+      font-size: 20px;
+      color: #0f172a;
+      margin: 0;
+      font-weight: 800;
+    }
+    .formula-icon {
+      font-size: 26px;
+    }
+    .quiz-card {
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border: 1px solid #bae6fd;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .quiz-mission {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0369a1;
+      margin: 0 0 8px;
+      word-break: keep-all;
+    }
+    .quiz-hint {
+      font-size: 13px;
+      color: #0284c7;
+      margin: 0;
+    }
+    
+    /* Slot Assembly Area */
+    .slot-container {
+      margin-bottom: 20px;
+    }
+    .slot-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .slot-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+    }
+    .slot-tools {
+      display: flex;
+      gap: 6px;
+    }
+    .slot-tool-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: white;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .slot-tool-btn:hover {
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .slot-box {
+      min-height: 64px;
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      transition: border-color 0.2s;
+    }
+    .slot-box.active {
+      border-color: #0ea5e9;
+      background: #ffffff;
+    }
+    .slot-placeholder {
+      font-size: 13px;
+      color: #94a3b8;
+      width: 100%;
+      text-align: center;
+      user-select: none;
+    }
+    .chip-item {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      animation: chipPop 0.15s ease-out;
+      user-select: none;
+    }
+    @keyframes chipPop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .chip-item.num { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+    .chip-item.op { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 16px; }
+    .chip-item.var { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .chip-item.energy { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+
+    /* Card Choice Palette */
+    .palette-container {
+      margin-bottom: 22px;
+    }
+    .palette-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .palette-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .palette-card {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1.5px solid transparent;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .palette-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    }
+    .palette-card.num { background: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
+    .palette-card.op { background: #fffbeb; color: #b45309; border-color: #fde68a; font-size: 16px; }
+    .palette-card.var { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .palette-card.energy { background: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
+
+    /* Action & Result */
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      border: 0;
+      transition: all 0.15s;
+    }
+    .action-btn.submit {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+    }
+    .action-btn.submit:hover {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+    }
+    .action-btn.next {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+    .action-btn.next:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+    .result-msg {
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .result-msg.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .result-msg.bad { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    /* Math Formula Typography (Tex/Math Serif Style) */
+    .math-expr {
+      font-family: Georgia, "Cambria Math", "Times New Roman", serif;
+      font-size: 1.25em;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      vertical-align: middle;
+      font-variant-numeric: lining-nums;
+    }
+    .math-expr i {
+      font-style: italic;
+      font-family: Georgia, "Cambria Math", "Times New Roman", serif;
+    }
+    .math-frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1;
+      font-size: 0.82em;
+      margin: 0 4px;
+      font-family: Georgia, "Cambria Math", "Times New Roman", serif;
+    }
+    .math-frac .num {
+      border-bottom: 1.5px solid currentColor;
+      padding: 0 3px 1px;
+      display: block;
+    }
+    .math-frac .den {
+      padding-top: 1px;
+      display: block;
+    }
+    .palette-card i, .chip-item i {
+      font-style: italic;
+      font-family: Georgia, "Cambria Math", "Times New Roman", serif;
+      font-weight: 700;
+      margin-left: 2px;
+    }
+    .palette-card .math-frac, .chip-item .math-frac {
+      font-size: 0.78em;
+      margin: 0 1px;
+    }
+
+    /* Today's Stats Section */
+    .formula-stats-sec {
+      border-top: 2px solid #f1f5f9;
+      padding-top: 20px;
+    }
+    .stats-sec-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1e293b;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stats-date-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .formula-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .fstat-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .fstat-num {
+      display: block;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .fstat-num.ok { color: #10b981; }
+    .fstat-num.bad { color: #ef4444; }
+    .fstat-label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 700;
+      margin-top: 4px;
+      display: block;
+    }
+    .fstat-type-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fstat-type-row {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .fstat-type-name { font-weight: 700; color: #334155; }
+    .fstat-type-val { font-weight: 800; color: #0284c7; }
+  </style>
+</head>
+<body>
+  <div class="formula-app">
+    <div class="formula-header">
+      <div class="formula-title">
+        <span class="formula-icon">💡</span>
+        <h1>에너지 공식 외우기 퀴즈</h1>
+      </div>
+    </div>
+
+    <!-- Quiz Question -->
+    <div class="quiz-card">
+      <h2 id="quizMission" class="quiz-mission">공식을 순서대로 조합하세요!</h2>
+    </div>
+
+    <!-- Slot Assembly Area -->
+    <div class="slot-container">
+      <div class="slot-label-row">
+        <span class="slot-label">내가 조합한 공식:</span>
+        <div class="slot-tools">
+          <button type="button" id="undoBtn" class="slot-tool-btn">⌫ 지우기</button>
+          <button type="button" id="clearBtn" class="slot-tool-btn">🔄 전체 비우기</button>
+        </div>
+      </div>
+      <div id="slotBox" class="slot-box active">
+        <div id="slotPlaceholder" class="slot-placeholder">아래 카드를 눌러 공식을 조합하세요 (× 버튼은 생략 가능)</div>
+      </div>
+    </div>
+
+    <!-- Palette Cards -->
+    <div class="palette-container">
+      <span class="palette-label">공식 조각 카드:</span>
+      <div id="paletteGrid" class="palette-grid">
+        <button type="button" class="palette-card num" data-token="½"><span class="math-frac"><span class="num">1</span><span class="den">2</span></span></button>
+        <button type="button" class="palette-card num" data-token="9.8"><span class="math-expr">9.8</span></button>
+        <button type="button" class="palette-card var" data-token="질량 m">질량 <i>m</i></button>
+        <button type="button" class="palette-card var" data-token="높이 h">높이 <i>h</i></button>
+        <button type="button" class="palette-card var" data-token="속력 v">속력 <i>v</i></button>
+        <button type="button" class="palette-card op" data-token="×">×</button>
+        <button type="button" class="palette-card op" data-token="+">+</button>
+      </div>
+    </div>
+
+    <!-- Result Feedback -->
+    <div id="resultMsg" class="result-msg" hidden></div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <button type="button" id="checkAnswerBtn" class="action-btn submit">정답 확인하기 ↗</button>
+      <button type="button" id="nextQuizBtn" class="action-btn next" hidden>다음 공식 도전 ➔</button>
+    </div>
+
+    <!-- Today's Stats Section -->
+    <div class="formula-stats-sec">
+      <div class="stats-sec-title">
+        <span>📊 오늘의 공식 학습 통계</span>
+        <span id="fstatDate" class="stats-date-tag">2026. 09. 27</span>
+      </div>
+      <div class="formula-stats-grid">
+        <div class="fstat-item">
+          <span id="fstatSolved" class="fstat-num">0개</span>
+          <span class="fstat-label">푼 문제</span>
+        </div>
+        <div class="fstat-item">
+          <span id="fstatCorrect" class="fstat-num ok">0개</span>
+          <span class="fstat-label">맞힌 문제</span>
+        </div>
+        <div class="fstat-item">
+          <span id="fstatRate" class="fstat-num">0%</span>
+          <span class="fstat-label">정답률</span>
+        </div>
+      </div>
+      <div class="fstat-type-list">
+        <div class="fstat-type-row">
+          <span class="fstat-type-name">🟢 위치 에너지 ($E_p$)</span>
+          <span id="fstatPotential" class="fstat-type-val">0 / 0문제 (0%)</span>
+        </div>
+        <div class="fstat-type-row">
+          <span class="fstat-type-name">🔵 운동 에너지 ($E_k$)</span>
+          <span id="fstatKinetic" class="fstat-type-val">0 / 0문제 (0%)</span>
+        </div>
+        <div class="fstat-type-row">
+          <span class="fstat-type-name">🟣 역학적 에너지 ($E$)</span>
+          <span id="fstatMechanical" class="fstat-type-val">0 / 0문제 (0%)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="formula.js"></script>
+</body>
+</html>
