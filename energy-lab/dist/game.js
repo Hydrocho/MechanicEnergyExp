@@ -65,7 +65,7 @@
   function makeSensoryQuestion(exp) {
     const mass = randInt(1, 5);
     if (exp === 'throw') {
-      const targetH = randInt(15, 45);
+      const targetH = randInt(5, 75);
       const targetSpeed = Math.sqrt(2 * G * targetH);
       return {
         exp: 'throw',
@@ -76,7 +76,7 @@
         given: `질량 ${mass} kg · 중력 가속도 g = 9.8 m/s²`
       };
     } else if (exp === 'coaster') {
-      const targetSpeed = randInt(12, 30);
+      const targetSpeed = randInt(8, 42);
       const targetH = (targetSpeed * targetSpeed) / (2 * G);
       return {
         exp: 'coaster',
@@ -87,7 +87,7 @@
         given: `질량 ${mass} kg · 중력 가속도 g = 9.8 m/s²`
       };
     } else {
-      const targetSpeed = randInt(12, 30);
+      const targetSpeed = randInt(10, 88);
       const targetH = (targetSpeed * targetSpeed) / (2 * G);
       return {
         exp: 'free',
