@@ -133,72 +133,146 @@
         <span id="statsDate" class="stats-date"></span>
       </div>
 
-      <div class="stats-overview">
-        <div class="stats-grid">
-          <div class="stats-item">
-            <span class="stats-num" id="statsSolved">0개</span>
-            <span class="stats-label" id="statsLabel1">전체 푼 문제</span>
+      <div id="quizStatsView">
+        <div class="stats-overview">
+          <div class="stats-grid">
+            <div class="stats-item">
+              <span class="stats-num" id="statsSolved">0개</span>
+              <span class="stats-label" id="statsLabel1">전체 푼 문제</span>
+            </div>
+            <div class="stats-item">
+              <span class="stats-num ok" id="statsCorrect">0개</span>
+              <span class="stats-label" id="statsLabel2">전체 맞힌 문제</span>
+            </div>
+            <div class="stats-item">
+              <span class="stats-num bad" id="statsWrong">0개</span>
+              <span class="stats-label" id="statsLabel3">틀린 문제</span>
+            </div>
           </div>
-          <div class="stats-item">
-            <span class="stats-num ok" id="statsCorrect">0개</span>
-            <span class="stats-label" id="statsLabel2">전체 맞힌 문제</span>
-          </div>
-          <div class="stats-item">
-            <span class="stats-num bad" id="statsWrong">0개</span>
-            <span class="stats-label" id="statsLabel3">틀린 문제</span>
+          <div class="stats-rate-box">
+            <div class="rate-header">
+              <span id="statsRateLabel">전체 정답률</span>
+              <strong id="statsRatePercent">0%</strong>
+            </div>
+            <div class="rate-bar-track">
+              <div id="statsRateBar" class="rate-bar-fill" style="width: 0%"></div>
+            </div>
           </div>
         </div>
-        <div class="stats-rate-box">
-          <div class="rate-header">
-            <span id="statsRateLabel">전체 정답률</span>
-            <strong id="statsRatePercent">0%</strong>
-          </div>
-          <div class="rate-bar-track">
-            <div id="statsRateBar" class="rate-bar-fill" style="width: 0%"></div>
+
+        <div class="stats-breakdown">
+          <h4 class="breakdown-title" id="statsBreakdownTitle">🧪 실험 유형별 성취도</h4>
+          <div class="type-stats-list">
+            <div class="type-stat-card">
+              <div class="type-stat-header">
+                <span class="type-icon">🪂</span>
+                <span class="type-name">자유 낙하</span>
+                <span class="type-count" id="freeStatCount">0 / 0문제</span>
+                <strong class="type-rate" id="freeStatRate">0%</strong>
+              </div>
+              <div class="rate-bar-track mini">
+                <div id="freeStatBar" class="rate-bar-fill free-bar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="type-stat-card">
+              <div class="type-stat-header">
+                <span class="type-icon">🚀</span>
+                <span class="type-name">연직 상방 운동</span>
+                <span class="type-count" id="throwStatCount">0 / 0문제</span>
+                <strong class="type-rate" id="throwStatRate">0%</strong>
+              </div>
+              <div class="rate-bar-track mini">
+                <div id="throwStatBar" class="rate-bar-fill throw-bar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="type-stat-card">
+              <div class="type-stat-header">
+                <span class="type-icon">🎢</span>
+                <span class="type-name">롤러코스터</span>
+                <span class="type-count" id="coasterStatCount">0 / 0문제</span>
+                <strong class="type-rate" id="coasterStatRate">0%</strong>
+              </div>
+              <div class="rate-bar-track mini">
+                <div id="coasterStatBar" class="rate-bar-fill coaster-bar" style="width: 0%"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="stats-breakdown">
-        <h4 class="breakdown-title" id="statsBreakdownTitle">🧪 실험 유형별 성취도</h4>
-        <div class="type-stats-list">
-          
-          <div class="type-stat-card">
-            <div class="type-stat-header">
-              <span class="type-icon">🪂</span>
-              <span class="type-name">자유 낙하</span>
-              <span class="type-count" id="freeStatCount">0 / 0문제</span>
-              <strong class="type-rate" id="freeStatRate">0%</strong>
+      <div id="gameStatsView" hidden>
+        <div class="game-stats-overview">
+          <div class="game-total-card">
+            <span class="game-total-label">오늘의 총 도전 게임</span>
+            <strong id="gameTotalSolved" class="game-total-num">0개</strong>
+          </div>
+          <div class="star-stats-grid">
+            <div class="star-stat-item star-3">
+              <span class="star-badge">⭐⭐⭐ 별 3개</span>
+              <strong id="gameStar3Count" class="star-count">0 / 0개</strong>
             </div>
-            <div class="rate-bar-track mini">
-              <div id="freeStatBar" class="rate-bar-fill free-bar" style="width: 0%"></div>
+            <div class="star-stat-item star-2">
+              <span class="star-badge">⭐⭐ 별 2개</span>
+              <strong id="gameStar2Count" class="star-count">0 / 0개</strong>
+            </div>
+            <div class="star-stat-item star-1">
+              <span class="star-badge">⭐ 별 1개</span>
+              <strong id="gameStar1Count" class="star-count">0 / 0개</strong>
+            </div>
+            <div class="star-stat-item star-0">
+              <span class="star-badge">❌ 별 0개</span>
+              <strong id="gameStar0Count" class="star-count">0 / 0개</strong>
             </div>
           </div>
+        </div>
 
-          <div class="type-stat-card">
-            <div class="type-stat-header">
-              <span class="type-icon">🚀</span>
-              <span class="type-name">연직 상방 운동</span>
-              <span class="type-count" id="throwStatCount">0 / 0문제</span>
-              <strong class="type-rate" id="throwStatRate">0%</strong>
+        <div class="stats-breakdown" style="margin-top:16px">
+          <h4 class="breakdown-title">🎮 실험 유형별 게임 성과</h4>
+          <div class="type-stats-list">
+            <div class="type-stat-card game-type-card">
+              <div class="type-stat-header">
+                <span class="type-icon">🪂</span>
+                <span class="type-name">자유 낙하</span>
+                <span class="type-count" id="gameFreeTotal">총 0개 도전</span>
+              </div>
+              <div class="game-type-stars">
+                <span class="star-chip">⭐⭐⭐ <b id="gameFreeS3">0/0개</b></span>
+                <span class="star-chip">⭐⭐ <b id="gameFreeS2">0/0개</b></span>
+                <span class="star-chip">⭐ <b id="gameFreeS1">0/0개</b></span>
+                <span class="star-chip star-chip-0">별 0개 <b id="gameFreeS0">0/0개</b></span>
+              </div>
             </div>
-            <div class="rate-bar-track mini">
-              <div id="throwStatBar" class="rate-bar-fill throw-bar" style="width: 0%"></div>
+
+            <div class="type-stat-card game-type-card">
+              <div class="type-stat-header">
+                <span class="type-icon">🚀</span>
+                <span class="type-name">연직 상방 운동</span>
+                <span class="type-count" id="gameThrowTotal">총 0개 도전</span>
+              </div>
+              <div class="game-type-stars">
+                <span class="star-chip">⭐⭐⭐ <b id="gameThrowS3">0/0개</b></span>
+                <span class="star-chip">⭐⭐ <b id="gameThrowS2">0/0개</b></span>
+                <span class="star-chip">⭐ <b id="gameThrowS1">0/0개</b></span>
+                <span class="star-chip star-chip-0">별 0개 <b id="gameThrowS0">0/0개</b></span>
+              </div>
+            </div>
+
+            <div class="type-stat-card game-type-card">
+              <div class="type-stat-header">
+                <span class="type-icon">🎢</span>
+                <span class="type-name">롤러코스터</span>
+                <span class="type-count" id="gameCoasterTotal">총 0개 도전</span>
+              </div>
+              <div class="game-type-stars">
+                <span class="star-chip">⭐⭐⭐ <b id="gameCoasterS3">0/0개</b></span>
+                <span class="star-chip">⭐⭐ <b id="gameCoasterS2">0/0개</b></span>
+                <span class="star-chip">⭐ <b id="gameCoasterS1">0/0개</b></span>
+                <span class="star-chip star-chip-0">별 0개 <b id="gameCoasterS0">0/0개</b></span>
+              </div>
             </div>
           </div>
-
-          <div class="type-stat-card">
-            <div class="type-stat-header">
-              <span class="type-icon">🎢</span>
-              <span class="type-name">롤러코스터</span>
-              <span class="type-count" id="coasterStatCount">0 / 0문제</span>
-              <strong class="type-rate" id="coasterStatRate">0%</strong>
-            </div>
-            <div class="rate-bar-track mini">
-              <div id="coasterStatBar" class="rate-bar-fill coaster-bar" style="width: 0%"></div>
-            </div>
-          </div>
-
         </div>
       </div>
 

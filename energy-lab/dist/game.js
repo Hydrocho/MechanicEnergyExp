@@ -179,10 +179,11 @@
       date: todayKey,
       solved: 0,
       correct: 0,
+      stars: { s3: 0, s2: 0, s1: 0, s0: 0 },
       byType: {
-        free: { solved: 0, correct: 0 },
-        throw: { solved: 0, correct: 0 },
-        coaster: { solved: 0, correct: 0 }
+        free: { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } },
+        throw: { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } },
+        coaster: { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } }
       }
     });
 
@@ -192,12 +193,17 @@
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && parsed.date === todayKey) {
+            if (!parsed.stars) parsed.stars = { s3: 0, s2: 0, s1: 0, s0: 0 };
             if (!parsed.byType) {
               parsed.byType = {
-                free: { solved: 0, correct: 0 },
-                throw: { solved: 0, correct: 0 },
-                coaster: { solved: 0, correct: 0 }
+                free: { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } },
+                throw: { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } },
+                coaster: { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } }
               };
+            }
+            for (const key of ['free', 'throw', 'coaster']) {
+              if (!parsed.byType[key]) parsed.byType[key] = { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } };
+              if (!parsed.byType[key].stars) parsed.byType[key].stars = { s3: 0, s2: 0, s1: 0, s0: 0 };
             }
             return parsed;
           }
@@ -238,15 +244,21 @@
     return stats;
   };
 
-  const recordGameResult = (isCorrect, exp) => {
+  const recordGameResult = (starRating, exp) => {
+    const isSuccess = starRating >= 1;
     const stats = getDailyGameStats();
     stats.solved += 1;
-    if (isCorrect) stats.correct += 1;
+    if (isSuccess) stats.correct += 1;
+    const sKey = `s${starRating}`;
+    if (!stats.stars) stats.stars = { s3: 0, s2: 0, s1: 0, s0: 0 };
+    stats.stars[sKey] = (stats.stars[sKey] || 0) + 1;
 
     if (exp && stats.byType) {
-      if (!stats.byType[exp]) stats.byType[exp] = { solved: 0, correct: 0 };
+      if (!stats.byType[exp]) stats.byType[exp] = { solved: 0, correct: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } };
       stats.byType[exp].solved += 1;
-      if (isCorrect) stats.byType[exp].correct += 1;
+      if (isSuccess) stats.byType[exp].correct += 1;
+      if (!stats.byType[exp].stars) stats.byType[exp].stars = { s3: 0, s2: 0, s1: 0, s0: 0 };
+      stats.byType[exp].stars[sKey] = (stats.byType[exp].stars[sKey] || 0) + 1;
     }
 
     saveDailyGameStats(stats);
@@ -319,23 +331,30 @@
     const error = targetVal > 0 ? (Math.abs(actualVal - targetVal) / targetVal * 100) : 0;
     const isSuccess = error <= 25;
 
+    let starRating = 0;
     let stars = '⭐';
     let verdict = '다시 도전해 보세요! 💡';
     if (error <= 8) {
+      starRating = 3;
       stars = '⭐⭐⭐';
       verdict = '신의 감각! 완벽합니다! 🎉';
     } else if (error <= 18) {
+      starRating = 2;
       stars = '⭐⭐';
       verdict = '훌륭한 물리 직관입니다! 👍';
     } else if (error <= 25) {
+      starRating = 1;
       stars = '⭐';
       verdict = '좋은 직관입니다! 통과했어요! 👍';
     } else if (error <= 35) {
+      starRating = 0;
       stars = '⭐';
       verdict = '아까워요! 조금만 더 세밀하게 조절해 보세요! 💡';
+    } else {
+      starRating = 0;
     }
 
-    const stats = recordGameResult(isSuccess, exp);
+    const stats = recordGameResult(starRating, exp);
     sensoryScoreCount = stats.correct;
 
     const inputUnit = exp === 'throw' ? 'm/s' : 'm';
@@ -584,45 +603,77 @@
     const modal = $('statsModal');
     if (!modal) return;
     const isGame = (appMode === 'game');
-    const stats = isGame ? getDailyGameStats() : getDailyQuizStats();
 
-    const solved = stats.solved || 0;
-    const correct = stats.correct || 0;
-    const wrong = Math.max(0, solved - correct);
-    const rate = solved > 0 ? Math.round((correct / solved) * 100) : 0;
+    if ($('quizStatsView')) $('quizStatsView').hidden = isGame;
+    if ($('gameStatsView')) $('gameStatsView').hidden = !isGame;
 
-    const parts = (stats.date || getTodayKey()).split('-');
-    if ($('statsDate')) $('statsDate').textContent = `${parts[0]}. ${parts[1]}. ${parts[2]}`;
     if ($('statsIcon')) $('statsIcon').textContent = isGame ? '🎮' : '📝';
-    if ($('statsTitle')) $('statsTitle').textContent = isGame ? '오늘의 게임 통계' : '오늘의 퀴즈 통계';
+    if ($('statsTitle')) $('statsTitle').textContent = isGame ? '오늘의 게임 성과' : '오늘의 퀴즈 통계';
 
-    if ($('statsLabel1')) $('statsLabel1').textContent = isGame ? '도전한 게임' : '전체 푼 문제';
-    if ($('statsLabel2')) $('statsLabel2').textContent = isGame ? '성공한 게임' : '전체 맞힌 문제';
-    if ($('statsLabel3')) $('statsLabel3').textContent = isGame ? '재도전 게임' : '틀린 문제';
-    if ($('statsRateLabel')) $('statsRateLabel').textContent = isGame ? '게임 성공률' : '전체 정답률';
-    if ($('statsBreakdownTitle')) $('statsBreakdownTitle').textContent = isGame ? '🎮 실험 유형별 게임 성공률' : '🧪 실험 유형별 퀴즈 성취도';
+    if (!isGame) {
+      const stats = getDailyQuizStats();
+      const solved = stats.solved || 0;
+      const correct = stats.correct || 0;
+      const wrong = Math.max(0, solved - correct);
+      const rate = solved > 0 ? Math.round((correct / solved) * 100) : 0;
+      const parts = (stats.date || getTodayKey()).split('-');
 
-    if ($('statsSolved')) $('statsSolved').textContent = `${solved}개`;
-    if ($('statsCorrect')) $('statsCorrect').textContent = `${correct}개`;
-    if ($('statsWrong')) $('statsWrong').textContent = `${wrong}개`;
-    if ($('statsRatePercent')) $('statsRatePercent').textContent = `${rate}%`;
-    if ($('statsRateBar')) $('statsRateBar').style.width = `${rate}%`;
+      if ($('statsDate')) $('statsDate').textContent = `${parts[0]}. ${parts[1]}. ${parts[2]}`;
+      if ($('statsSolved')) $('statsSolved').textContent = `${solved}개`;
+      if ($('statsCorrect')) $('statsCorrect').textContent = `${correct}개`;
+      if ($('statsWrong')) $('statsWrong').textContent = `${wrong}개`;
+      if ($('statsRatePercent')) $('statsRatePercent').textContent = `${rate}%`;
+      if ($('statsRateBar')) $('statsRateBar').style.width = `${rate}%`;
 
-    const unitWord = isGame ? '게임' : '퀴즈';
-    const renderType = (typeKey, countId, rateId, barId) => {
-      const typeData = stats.byType?.[typeKey] || { solved: 0, correct: 0 };
-      const tSolved = typeData.solved || 0;
-      const tCorrect = typeData.correct || 0;
-      const tRate = tSolved > 0 ? Math.round((tCorrect / tSolved) * 100) : 0;
+      const renderType = (typeKey, countId, rateId, barId) => {
+        const typeData = stats.byType?.[typeKey] || { solved: 0, correct: 0 };
+        const tSolved = typeData.solved || 0;
+        const tCorrect = typeData.correct || 0;
+        const tRate = tSolved > 0 ? Math.round((tCorrect / tSolved) * 100) : 0;
 
-      if ($(countId)) $(countId).textContent = `${tCorrect} / ${tSolved}${unitWord}`;
-      if ($(rateId)) $(rateId).textContent = `${tRate}%`;
-      if ($(barId)) $(barId).style.width = `${tRate}%`;
-    };
+        if ($(countId)) $(countId).textContent = `${tCorrect} / ${tSolved}퀴즈`;
+        if ($(rateId)) $(rateId).textContent = `${tRate}%`;
+        if ($(barId)) $(barId).style.width = `${tRate}%`;
+      };
 
-    renderType('free', 'freeStatCount', 'freeStatRate', 'freeStatBar');
-    renderType('throw', 'throwStatCount', 'throwStatRate', 'throwStatBar');
-    renderType('coaster', 'coasterStatCount', 'coasterStatRate', 'coasterStatBar');
+      renderType('free', 'freeStatCount', 'freeStatRate', 'freeStatBar');
+      renderType('throw', 'throwStatCount', 'throwStatRate', 'throwStatBar');
+      renderType('coaster', 'coasterStatCount', 'coasterStatRate', 'coasterStatBar');
+    } else {
+      const stats = getDailyGameStats();
+      const solved = stats.solved || 0;
+      const s3 = stats.stars?.s3 || 0;
+      const s2 = stats.stars?.s2 || 0;
+      const s1 = stats.stars?.s1 || 0;
+      const s0 = stats.stars?.s0 || 0;
+      const parts = (stats.date || getTodayKey()).split('-');
+
+      if ($('statsDate')) $('statsDate').textContent = `${parts[0]}. ${parts[1]}. ${parts[2]}`;
+      if ($('gameTotalSolved')) $('gameTotalSolved').textContent = `${solved}개`;
+      if ($('gameStar3Count')) $('gameStar3Count').textContent = `${s3} / ${solved}개`;
+      if ($('gameStar2Count')) $('gameStar2Count').textContent = `${s2} / ${solved}개`;
+      if ($('gameStar1Count')) $('gameStar1Count').textContent = `${s1} / ${solved}개`;
+      if ($('gameStar0Count')) $('gameStar0Count').textContent = `${s0} / ${solved}개`;
+
+      const renderGameType = (typeKey, totalId, s3Id, s2Id, s1Id, s0Id) => {
+        const typeData = stats.byType?.[typeKey] || { solved: 0, stars: { s3: 0, s2: 0, s1: 0, s0: 0 } };
+        const tSolved = typeData.solved || 0;
+        const ts3 = typeData.stars?.s3 || 0;
+        const ts2 = typeData.stars?.s2 || 0;
+        const ts1 = typeData.stars?.s1 || 0;
+        const ts0 = typeData.stars?.s0 || 0;
+
+        if ($(totalId)) $(totalId).textContent = `총 ${tSolved}개 도전`;
+        if ($(s3Id)) $(s3Id).textContent = `${ts3}/${tSolved}개`;
+        if ($(s2Id)) $(s2Id).textContent = `${ts2}/${tSolved}개`;
+        if ($(s1Id)) $(s1Id).textContent = `${ts1}/${tSolved}개`;
+        if ($(s0Id)) $(s0Id).textContent = `${ts0}/${tSolved}개`;
+      };
+
+      renderGameType('free', 'gameFreeTotal', 'gameFreeS3', 'gameFreeS2', 'gameFreeS1', 'gameFreeS0');
+      renderGameType('throw', 'gameThrowTotal', 'gameThrowS3', 'gameThrowS2', 'gameThrowS1', 'gameThrowS0');
+      renderGameType('coaster', 'gameCoasterTotal', 'gameCoasterS3', 'gameCoasterS2', 'gameCoasterS1', 'gameCoasterS0');
+    }
 
     modal.hidden = false;
     $('statsCloseBtn')?.focus?.();

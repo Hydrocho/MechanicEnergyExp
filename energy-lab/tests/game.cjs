@@ -58,7 +58,7 @@ console.log('PASS: sensorial physics game launch and reveal grading');
 // Test stats button and stats modal popup
 get('statsBtn').click();
 assert.equal(get('statsModal').hidden, false);
-assert.match(get('statsSolved').textContent, /1개/);
+assert.match(get('gameTotalSolved').textContent, /1개/);
 get('statsCloseBtn').click();
 assert.equal(get('statsModal').hidden, true);
 console.log('PASS: today stats modal and local storage recording');

@@ -187,8 +187,8 @@
 @media(max-width:760px){.chip{min-height:38px}.steps{font-size:13px}}
 
 /* ---- Alert Modal Popup ---- */
-.modal-backdrop{position:fixed;inset:0;background:rgba(18,26,38,0.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:grid;place-items:center;z-index:1000}
-.modal-backdrop[hidden]{display:none}
+.modal-backdrop{position:fixed;inset:0;background:rgba(18,26,38,0.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000}
+.modal-backdrop[hidden]{display:none !important}
 .modal-card{background:white;border-radius:14px;padding:24px 20px;max-width:340px;width:88%;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,0.2);animation:modalPop .18s ease-out}
 @keyframes modalPop{from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-icon{font-size:36px;margin-bottom:6px}
@@ -199,10 +199,14 @@
 /* ---- Daily Stats Button & Modal ---- */
 .stats-btn{padding:4px 10px;border:1px solid #d4a753;border-radius:6px;background:#fffdf5;color:#9a650b;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
 .stats-btn:hover{background:#fce8be;border-color:#c98a13}
-.stats-modal-card{max-width:480px;width:92%;padding:24px 22px;text-align:left}
-.stats-modal-card .modal-header{margin-bottom:16px;text-align:center}
+.stats-modal-card{max-width:480px;width:94%;max-height:85vh;display:flex;flex-direction:column;padding:20px 20px 16px;text-align:left;border-radius:16px;box-shadow:0 16px 36px rgba(0,0,0,0.22)}
+.stats-modal-card .modal-header{flex:0 0 auto;margin-bottom:12px;text-align:center}
 .stats-modal-card .modal-icon{font-size:32px;margin-bottom:4px}
 .stats-modal-card h3{margin:0;font-size:18px;color:#1e293b;font-weight:800}
+#quizStatsView,#gameStatsView{flex:1 1 auto;overflow-y:auto;min-height:0;padding-right:4px;-webkit-overflow-scrolling:touch}
+#quizStatsView::-webkit-scrollbar,#gameStatsView::-webkit-scrollbar{width:6px}
+#quizStatsView::-webkit-scrollbar-thumb,#gameStatsView::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.modal-actions{flex:0 0 auto;margin-top:12px;padding-top:8px;border-top:1px solid #edf2f7}
 .stats-date{font-size:12px;color:#8a929f;display:block;margin-top:3px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .stats-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center}
@@ -242,6 +246,25 @@
   .vert-slider-track-wrap input[type=range]{height:150px;width:20px}
   .vert-slider-val{font-size:11px;min-width:44px;padding:3px 4px}
 }
+
+.game-total-card{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f1f5f9;border:none;border-radius:10px;margin-bottom:10px}
+.game-total-label{font-size:14px;font-weight:500;color:#475569}
+.game-total-num{font-size:18px;font-weight:600;color:#1e293b;font-variant-numeric:tabular-nums}
+.star-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.star-stat-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8fafc;border:none;border-radius:8px}
+.star-badge{font-size:13px;font-weight:500;color:#475569}
+.star-count{font-size:14px;font-weight:600;color:#1e293b;font-variant-numeric:tabular-nums}
+.star-3, .star-2, .star-1, .star-0{background:#f8fafc}
+.star-3 .star-count, .star-2 .star-count, .star-1 .star-count, .star-0 .star-count{color:#1e293b}
+
+.game-type-card{border:none;background:#f8fafc;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.game-type-card .type-stat-header{margin-bottom:8px}
+.game-type-card .type-name{font-weight:600;color:#1e293b}
+.game-type-card .type-count{font-weight:400;color:#64748b}
+.game-type-stars{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.star-chip{font-size:12px;padding:4px 8px;border-radius:6px;background:#ffffff;border:none;color:#475569;font-weight:400;font-variant-numeric:tabular-nums}
+.star-chip b{font-weight:600;color:#1e293b;margin-left:3px}
+.star-chip-0{background:#ffffff;color:#64748b}.star-chip-0 b{color:#64748b}
 
 
 
