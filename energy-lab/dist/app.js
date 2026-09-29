@@ -5,6 +5,7 @@
   const FLOOR = 428, SCALE = 17.2, NS = 'http://www.w3.org/2000/svg';
   let mode = 'free', phase = 'ready', height = 100, velocity = 0, elapsed = 0;
   let initialHeight = 100, startHeight = 100, launchSpeed = 0, selectedSpeed = 10, frame = 0, lastTime = null, dragging = null;
+  let isHoldingCharge = false, chargeStartTime = 0, chargeAnimFrame = null;
   const history = [];
   const GHOST_INTERVAL=.3;
   let reviewSamples=[], panX=0, panY=0, reviewDrag=null, reviewing=false;
@@ -259,15 +260,53 @@
       label.textContent=`${p.speed.toFixed(2)} m/s`;ghosts.push(label);
     }
     $('reviewGhosts').replaceChildren(...ghosts);
+    if ($('chargeControlCol')) {
+      const showCharge = (phase === 'ready' || phase === 'aiming') && call('canDrag') !== false;
+      $('chargeControlCol').hidden = !showCharge;
+      if (showCharge) {
+        if ($('chargeBtn')) $('chargeBtn').disabled = false;
+        if (!isHoldingCharge) {
+          if ($('chargeTitle')) $('chargeTitle').textContent = mode === 'throw' ? '속도 조절' : '높이 조절';
+          if ($('chargeMainText')) $('chargeMainText').innerHTML = mode === 'throw' ? '꾹 누르면<br>속력 조절' : '꾹 누르면<br>높이 조절';
+          if ($('chargeSubText')) $('chargeSubText').textContent = mode === 'throw' ? '떼면 발사!' : '떼면 시작!';
+          if ($('chargeIcon')) $('chargeIcon').textContent = mode === 'throw' ? '⚡' : (mode === 'coaster' ? '🎢' : '📏');
+          if ($('chargeVal')) {
+            if (call('isSensorySetup') === true && mode !== 'throw') {
+              $('chargeVal').textContent = '??? m';
+            } else if (mode === 'throw') {
+              $('chargeVal').textContent = `${selectedSpeed.toFixed(2)} m/s`;
+            } else if (mode === 'coaster') {
+              $('chargeVal').textContent = `${coasterHeight.toFixed(1)} m`;
+            } else {
+              $('chargeVal').textContent = `${initialHeight.toFixed(1)} m`;
+            }
+          }
+        }
+      }
+    }
     updateInstruction();
     updateEnergy();
     document.dispatchEvent(new CustomEvent('experiment:update' ,{detail:state()}));
   }
-  function reset() { cancelAnimationFrame(frame);impactSample=null;selectedSample=null;reviewSamples=[];panX=panY=0;reviewing=false;reviewDrag=null;$('scene').classList.remove('reviewing'); dragging=null; $('ballControl').classList.remove('dragging');phase='ready';elapsed=0;velocity=0;lastTime=null;history.length=0;startHeight=mode==='free'?initialHeight:mode==='coaster'?coasterHeight:0;height=startHeight;if(mode==='coaster')buildCoaster();$('error').textContent='';render(); }
+  function stopChargeLoop() {
+    if (chargeAnimFrame) {
+      cancelAnimationFrame(chargeAnimFrame);
+      chargeAnimFrame = null;
+    }
+    isHoldingCharge = false;
+    const btn = $('chargeBtn');
+    if (btn) {
+      btn.classList.remove('holding');
+      if ($('chargeMeterFill')) $('chargeMeterFill').style.height = '0%';
+      if ($('chargeMainText')) $('chargeMainText').innerHTML = mode === 'throw' ? '꾹 누르면<br>속력 조절' : '꾹 누르면<br>높이 조절';
+      if ($('chargeSubText')) $('chargeSubText').textContent = mode === 'throw' ? '떼면 발사!' : '떼면 시작!';
+    }
+  }
+  function reset() { stopChargeLoop(); cancelAnimationFrame(frame);impactSample=null;selectedSample=null;reviewSamples=[];panX=panY=0;reviewing=false;reviewDrag=null;$('scene').classList.remove('reviewing'); dragging=null; $('ballControl').classList.remove('dragging');phase='ready';elapsed=0;velocity=0;lastTime=null;history.length=0;startHeight=mode==='free'?initialHeight:mode==='coaster'?coasterHeight:0;height=startHeight;if(mode==='coaster')buildCoaster();$('error').textContent='';render(); }
   function setMode(next) {
-    clearHeightNotice();mode=next;
+    stopChargeLoop();clearHeightNotice();mode=next;
     const isThrow=mode==='throw';
-    $('ballControl').setAttribute('aria-label',isThrow?'공을 아래로 당긴 뒤 놓으면 발사됩니다. 초기 속력 입력 후 실험 시작 버튼도 사용할 수 있습니다.':mode==='coaster'?'궤도 위의 공':'낙하하는 공');
+    $('ballControl').setAttribute('aria-label',isThrow?'공을 아래로 당기거나 오른쪽 버튼을 꾹 눌러 속력을 조절한 뒤 떼면 발사됩니다.':mode==='coaster'?'궤도 위의 공':'낙하하는 공');
     $('scene').setAttribute('viewBox',isThrow?'0 44 600 490':'0 44 600 440');
     $('worldBounds').setAttribute('height',isThrow?444:400);
     for(const name of ['free','throw','coaster'])$(name+'Tab').setAttribute('aria-pressed',mode===name);
@@ -278,7 +317,7 @@
     $('height').max=String(isThrow?MAX_SPEED:MAX_HEIGHT);
     $('rangeNote').textContent=isThrow?'0.5–98.99 m/s':'1–500 m';
     $('height').value=isThrow?selectedSpeed:mode==='free'?initialHeight:coasterHeight;
-    $('instruction').textContent=isThrow?'공을 아래로 당겼다 놓으세요. 초기 속력을 입력해 시작할 수도 있어요.':mode==='coaster'?'마지막 언덕을 내려와 평지에서 3초 이동한 뒤 벽에 부딪혀 멈춥니다.':'초기 높이를 정하고 실험을 시작하세요.';
+    $('instruction').textContent=isThrow?'공을 아래로 당기거나 오른쪽 속도 조절 버튼을 꾹 누르고 계시면 발사할 수 있어요.':mode==='coaster'?'마지막 언덕을 내려와 평지에서 3초 이동한 뒤 벽에 부딪혀 멈춥니다.':'초기 높이를 정하고 실험을 시작하세요.';
     $('physicsNote').textContent=mode==='coaster'?'공기 저항·마찰 없음 · 회전 에너지 제외':'공기 저항 없음';
     reset();
     call('modeChanged',mode);
@@ -346,6 +385,98 @@
   $('ballControl').addEventListener('pointermove',event=>{if(!dragging||dragging.id!==event.pointerId)return;const distance=Math.max(0,point(event).y-dragging.y);dragging.moved=distance>3;selectedSpeed=Math.min(dragMax(),Math.max(.5,distance/(call('dragDistance')||100)*dragMax()));$('height').value=selectedSpeed.toFixed(2);syncVertSlider();render();});
   $('ballControl').addEventListener('pointerup',event=>{if(!dragging||dragging.id!==event.pointerId)return;const fire=dragging.moved;dragging=null;$('ballControl').classList.remove('dragging');$('ballControl').releasePointerCapture(event.pointerId);phase='ready';$('height').value=selectedSpeed.toFixed(2);syncVertSlider();if(fire)start(true);else render();});
   $('ballControl').addEventListener('pointercancel',()=>reset());$('ballControl').addEventListener('lostpointercapture',()=>{if(dragging)reset();});
+  
+  function startChargeLoop() {
+    function updateChargeLoop(now) {
+      if (!isHoldingCharge) {
+        stopChargeLoop();
+        return;
+      }
+      const elapsedSec = (now - chargeStartTime) / 1000;
+      const period = 2.4;
+      const factor = 0.5 - 0.5 * Math.cos((2 * Math.PI * elapsedSec) / period);
+
+      if (mode === 'throw') {
+        const minVal = 0.5;
+        const maxVal = dragMax();
+        selectedSpeed = minVal + (maxVal - minVal) * factor;
+        selectedSpeed = Math.round(selectedSpeed * 100) / 100;
+        $('height').value = selectedSpeed.toFixed(2);
+        if ($('chargeVal')) $('chargeVal').textContent = `${selectedSpeed.toFixed(2)} m/s`;
+      } else if (mode === 'coaster') {
+        const minVal = 1;
+        const maxVal = 100;
+        coasterHeight = minVal + (maxVal - minVal) * factor;
+        coasterHeight = Math.round(coasterHeight * 10) / 10;
+        height = coasterHeight;
+        startHeight = coasterHeight;
+        $('height').value = coasterHeight.toFixed(1);
+        if ($('chargeVal')) {
+          const isSensory = (call('isSensorySetup') === true);
+          $('chargeVal').textContent = isSensory ? '??? m' : `${coasterHeight.toFixed(1)} m`;
+        }
+      } else {
+        const minVal = 1;
+        const maxVal = MAX_HEIGHT;
+        initialHeight = minVal + (maxVal - minVal) * factor;
+        initialHeight = Math.round(initialHeight * 10) / 10;
+        height = initialHeight;
+        startHeight = initialHeight;
+        $('height').value = initialHeight.toFixed(1);
+        if ($('chargeVal')) {
+          const isSensory = (call('isSensorySetup') === true);
+          $('chargeVal').textContent = isSensory ? '??? m' : `${initialHeight.toFixed(1)} m`;
+        }
+      }
+
+      if ($('chargeMeterFill')) $('chargeMeterFill').style.height = `${(factor * 100).toFixed(1)}%`;
+      if ($('chargeMainText')) {
+        $('chargeMainText').innerHTML = mode === 'throw' ? '속력 조절 중!<br>손 떼면 발사' : '높이 조절 중!<br>손 떼면 시작';
+      }
+      if ($('chargeSubText')) $('chargeSubText').textContent = mode === 'throw' ? '원하는 속도에!' : '원하는 높이에!';
+
+      syncVertSlider();
+      render();
+
+      chargeAnimFrame = requestAnimationFrame(updateChargeLoop);
+    }
+    chargeAnimFrame = requestAnimationFrame(updateChargeLoop);
+  }
+
+  const chargeBtn = $('chargeBtn');
+  if (chargeBtn) {
+    chargeBtn.addEventListener('pointerdown', event => {
+      if ((phase !== 'ready' && phase !== 'aiming') || event.button !== 0 || call('canDrag') === false) return;
+      event.preventDefault();
+      reset();
+      phase = 'aiming';
+      isHoldingCharge = true;
+      chargeStartTime = performance.now();
+      chargeBtn.classList.add('holding');
+      try { chargeBtn.setPointerCapture(event.pointerId); } catch(e){}
+      startChargeLoop();
+    });
+
+    const endCharge = event => {
+      if (!isHoldingCharge) return;
+      stopChargeLoop();
+      try { if (chargeBtn.hasPointerCapture(event.pointerId)) chargeBtn.releasePointerCapture(event.pointerId); } catch(e){}
+      phase = 'ready';
+      if (mode === 'throw') {
+        $('height').value = selectedSpeed.toFixed(2);
+      } else if (mode === 'coaster') {
+        $('height').value = coasterHeight.toFixed(1);
+      } else {
+        $('height').value = initialHeight.toFixed(1);
+      }
+      syncVertSlider();
+      start(true);
+    };
+
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => {
+      chargeBtn.addEventListener(type, endCharge);
+    });
+  }
   $('energyLive').onclick=()=>{selectedSample=null;render();};
   $('mass').addEventListener('input',()=>{
     const mass=$('mass').valueAsNumber;

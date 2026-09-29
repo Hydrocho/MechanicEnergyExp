@@ -382,6 +382,7 @@
   h.dragDistance = () => appMode !== 'lab' ? 150 : 0;
   h.canDrag = () => appMode === 'lab' || (appMode === 'quiz' && quizState === 'setup') || (appMode === 'game' && sensoryState === 'setup');
   h.inputLocked = () => false;
+  h.isSensorySetup = () => appMode === 'game' && sensoryState === 'setup';
 
   function updateVertSliderDisplay(val) {
     const exp = lab.info()?.mode || 'free';

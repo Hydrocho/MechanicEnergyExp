@@ -86,6 +86,18 @@
               </div>
               <div id="vertSliderVal" class="vert-slider-val">100.0 m</div>
             </div>
+            <div id="chargeControlCol" class="charge-control-col" hidden aria-label="속도 조절 및 발사 버튼">
+              <span id="chargeTitle" class="charge-title">속도 조절</span>
+              <button id="chargeBtn" class="charge-btn" type="button" aria-label="오래 누르고 있으면 속력이 변하고 손을 떼면 발사됩니다">
+                <div class="charge-meter-fill" id="chargeMeterFill"></div>
+                <div class="charge-btn-content">
+                  <span class="charge-icon" id="chargeIcon">⚡</span>
+                  <span class="charge-main-text" id="chargeMainText">꾹 누르면<br>속력 조절</span>
+                  <span class="charge-sub-text" id="chargeSubText">떼면 발사!</span>
+                </div>
+              </button>
+              <div class="charge-val" id="chargeVal">10.00 m/s</div>
+            </div>
           </div>
           <div class="readouts"><div><span>높이</span><strong id="heightReadout">100.00 <small>m</small></strong></div><div><span>속력</span><strong id="speedReadout">0.00 <small>m/s</small></strong></div><div><span>시간</span><strong id="timeReadout">0.00 <small>s</small></strong></div></div>
         </div>
